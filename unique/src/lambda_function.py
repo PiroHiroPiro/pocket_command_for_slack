@@ -24,27 +24,32 @@ HEADERS = {
     'cache-control': "no-cache"
 }
 
-def delete_tag():
+def unique():
     try:
         payload = {
             "consumer_key": POCKET_CONSUMER_KEY,
             "access_token": POCKET_ACCESS_TOKEN,
             "tag"         : "twitter",
             "detailType"  : "complete",
-            "count"       : 5000
+            "count"       : 1000
         }
         res = requests.request("POST", POCKET_GET_API_URL, data=json.dumps(payload), headers=HEADERS)
         res.raise_for_status()
         res_json = res.json()
         actions = []
+        url_list = []
+        delete_count = 0
         for item_id in res_json['list'].keys():
-            if len(res_json['list'][item_id]['tags']) >= 2:
-                action = {
-                    "action" : "tags_remove",
-                    "item_id": item_id,
-                    "tags"   : "twitter"
-                }
-                actions.append(action)
+            if 'resolved_url' in res_json['list'][item_id].keys():
+                if res_json['list'][item_id]['resolved_url'] in url_list:
+                    action = {
+                        "action" : "delete",
+                        "item_id": item_id
+                    }
+                    actions.append(action)
+                    delete_count += 1
+                else:
+                    url_list.append(res_json['list'][item_id]['resolved_url'])
         if len(actions) > 0:
             payload = {
                 "consumer_key": POCKET_CONSUMER_KEY,
@@ -53,7 +58,7 @@ def delete_tag():
             }
             res = requests.request("POST", POCKET_SEND_API_URL, data=json.dumps(payload), headers=HEADERS)
             res.raise_for_status()
-        text = "Success!"
+        text = "Success! %d items were deleted." % delete_count
         color = "good"
     except:
         text = "Failed!"
@@ -68,7 +73,7 @@ def lambda_handler(event, context):
     slackbot_name = 'pocketer'
     if query.get('user_name', [slackbot_name])[0] == slackbot_name:
         return { 'statusCode': 200 }
-    content = delete_tag()
+    content = unique()
     slack_message = {
         'channel'    : SLACK_CHANNEL,
         'attachments': [
