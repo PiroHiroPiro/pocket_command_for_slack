@@ -51,12 +51,12 @@ def pick_up():
 
 def lambda_handler(event, context):
     token = os.environ['SLACK_OUTGOING_WEBHOOK_TOKEN']
-    query = parse_qs(event.get('body') or '')
-    if query.get('token', [''])[0] != token:
-        return { 'statusCode': 400 }
-    slackbot_name = 'pocketer'
-    if query.get('user_name', [slackbot_name])[0] == slackbot_name:
-        return { 'statusCode': 200 }
+    # query = parse_qs(event.get('body') or '')
+    # if query.get('token', [''])[0] != token:
+    #     return { 'statusCode': 400 }
+    # slackbot_name = 'pocketer'
+    # if query.get('user_name', [slackbot_name])[0] == slackbot_name:
+    #     return { 'statusCode': 200 }
     content = pick_up()
     slack_message = {
         'channel'    : SLACK_CHANNEL,
