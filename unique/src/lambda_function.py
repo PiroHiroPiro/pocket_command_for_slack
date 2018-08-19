@@ -29,37 +29,20 @@ def unique():
         payload = {
             "consumer_key": POCKET_CONSUMER_KEY,
             "access_token": POCKET_ACCESS_TOKEN,
-            "tag": [
-                "tool",
-                "twitter"
-            ],
-            "count": 5000
+            "detailType"  : "complete",
+            "count"       : 1000
         }
         res = requests.request("POST", POCKET_GET_API_URL, data=json.dumps(payload), headers=HEADERS)
         res.raise_for_status()
         res_json = res.json()
 
-        url_list = []
-        for item_id in res_json['list'].keys():
-            if 'resolved_url' in res_json['list'][item_id].keys():
-                url_list.append(res_json['list'][item_id]['resolved_url'])
-
-        payload = {
-            "consumer_key": POCKET_CONSUMER_KEY,
-            "access_token": POCKET_ACCESS_TOKEN,
-            "tag": "twitter",
-            "detailType": "complete",
-            "count": 5000
-        }
-        res = requests.request("POST", POCKET_GET_API_URL, data=json.dumps(payload), headers=HEADERS)
-        res.raise_for_status()
-        res_json = res.json()
-
-        actions = []
+        actions      = []
+        url_list     = []
         delete_count = 0
+
         for item_id in res_json['list'].keys():
-            if 'resolved_url' in res_json['list'][item_id].keys():
-                if res_json['list'][item_id]['resolved_url'] in url_list and len(res_json['list'][item_id]['tags']) == 1:
+            if 'resolved_url' in res_json['list'][item_id].keys() and 'tags' in res_json['list'][item_id].keys():
+                if ['twitter'] == res_json['list'][item_id]['tags'].keys() and (res_json['list'][item_id]['resolved_url'] in url_list):
                     action = {
                         "action" : "delete",
                         "item_id": item_id
@@ -68,7 +51,6 @@ def unique():
                     delete_count += 1
                 else:
                     url_list.append(res_json['list'][item_id]['resolved_url'])
-
         if len(actions) > 0:
             payload = {
                 "consumer_key": POCKET_CONSUMER_KEY,
@@ -78,10 +60,10 @@ def unique():
             res = requests.request("POST", POCKET_SEND_API_URL, data=json.dumps(payload), headers=HEADERS)
             res.raise_for_status()
 
-        text = "Success! %d items were deleted." % delete_count
+        text  = "Success! %d items were deleted." % delete_count
         color = "good"
     except:
-        text = "Failed!"
+        text  = "Failed!"
         color = "#ff0000"
     return { "text": text, "color": color }
 
