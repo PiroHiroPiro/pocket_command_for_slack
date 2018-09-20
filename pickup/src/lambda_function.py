@@ -32,11 +32,14 @@ def pick_up():
             "access_token": POCKET_ACCESS_TOKEN,
             "tag": [
                 "amazon_dash_button",
+                "conference",
+                "done",
+                "english",
                 "tool",
                 "twitter"
             ],
             "sort": "oldest",
-            "count": 250
+            "count": 5000
         }
         res = requests.request("POST", POCKET_GET_API_URL, data=json.dumps(payload), headers=HEADERS)
         res.raise_for_status()
