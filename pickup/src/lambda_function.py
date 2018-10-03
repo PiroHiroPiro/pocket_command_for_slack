@@ -34,12 +34,11 @@ def pick_up():
                 "amazon_dash_button",
                 "conference",
                 "done",
-                "english",
                 "tool",
                 "twitter"
             ],
             "sort": "oldest",
-            "count": 5000
+            "count": 2000
         }
         res = requests.request("POST", POCKET_GET_API_URL, data=json.dumps(payload), headers=HEADERS)
         res.raise_for_status()
