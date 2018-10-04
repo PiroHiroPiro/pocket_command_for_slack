@@ -1,1 +1,1 @@
-# DELETE DUPLICATE for Pocket API
+# Delete duplicate posts for Pocket API
