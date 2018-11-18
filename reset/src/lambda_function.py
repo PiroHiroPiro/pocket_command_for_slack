@@ -31,7 +31,7 @@ def reset():
             "access_token": POCKET_ACCESS_TOKEN,
             "tag"         : "twitter",
             "detailType"  : "complete",
-            "count"       : 5000
+            "count"       : 3000
         }
         res = requests.request("POST", POCKET_GET_API_URL, data=json.dumps(payload), headers=HEADERS)
         res.raise_for_status()
@@ -40,9 +40,8 @@ def reset():
         for item_id in res_json['list'].keys():
             if len(res_json['list'][item_id]['tags']) == 1:
                 action = {
-                    "action" : "tags_remove",
-                    "item_id": item_id,
-                    "tags"   : "twitter"
+                    "action" : "delete",
+                    "item_id": item_id
                 }
                 actions.append(action)
         if len(actions) > 0:
