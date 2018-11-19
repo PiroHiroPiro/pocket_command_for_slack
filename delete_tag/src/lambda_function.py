@@ -38,13 +38,20 @@ def delete_tag():
         res_json = res.json()
         actions = []
         for item_id in res_json['list'].keys():
-            if len(res_json['list'][item_id]['tags']) >= 2:
+            if ('resolved_url' in res_json['list'][item_id].keys()) and (res_json['list'][item_id]['resolved_url'].startswith('https://twitter.com/')):
+                action = {
+                    "action" : "delete",
+                    "item_id": item_id
+                }
+                actions.append(action)
+            elif len(res_json['list'][item_id]['tags']) >= 2:
                 action = {
                     "action" : "tags_remove",
                     "item_id": item_id,
                     "tags"   : "twitter"
                 }
                 actions.append(action)
+
         if len(actions) > 0:
             payload = {
                 "consumer_key": POCKET_CONSUMER_KEY,
