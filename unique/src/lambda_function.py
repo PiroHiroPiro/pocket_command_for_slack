@@ -29,31 +29,28 @@ def unique():
         payload = {
             "consumer_key": POCKET_CONSUMER_KEY,
             "access_token": POCKET_ACCESS_TOKEN,
+            "tag"         : "twitter",
             "detailType"  : "complete",
-            "count"       : 5000
+            "count"       : 3000
         }
         res = requests.request("POST", POCKET_GET_API_URL, data=json.dumps(payload), headers=HEADERS)
         res.raise_for_status()
         res_json = res.json()
 
-        actions        = []
-        url_list       = []
+        actions          = []
+        resolved_id_list = []
 
-        # 「Twitter」タグの付いていない記事のURLを格納する
+        # confirm that resolved_id of item with Twitter tag is in resolved_id_list
         for item_id in res_json['list'].keys():
-            if ('tags' in res_json['list'][item_id].keys()) and ('resolved_url' in res_json['list'][item_id].keys()):
-                if 'twitter' not in res_json['list'][item_id]['tags'].keys():
-                    url_list.append(res_json['list'][item_id]['resolved_url'])
-
-        # 「Twitter」タグの付いている記事のURLがurl_listにあるか確認する
-        for item_id in res_json['list'].keys():
-            if 'resolved_url' in res_json['list'][item_id].keys() and 'tags' in res_json['list'][item_id].keys():
-                if (['twitter'] == res_json['list'][item_id]['tags'].keys()) and (res_json['list'][item_id]['resolved_url'] in url_list):
+            if 'tags' in res_json['list'][item_id].keys() and 'resolved_id' in res_json['list'][item_id].keys():
+                if len(res_json['list'][item_id]['tags'].keys()) == 1 and (res_json['list'][item_id]['resolved_id'] in resolved_id_list):
                     action = {
                         "action" : "delete",
                         "item_id": item_id
                     }
                     actions.append(action)
+                else:
+                    resolved_id_list.append(res_json['list'][item_id]['resolved_id'])
 
         if len(actions) > 0:
             payload = {
