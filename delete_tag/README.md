@@ -1,1 +1,1 @@
-# DELETE TAG for Pocket API
+# Delete Twitter tag for Pocket API

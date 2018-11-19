@@ -24,25 +24,24 @@ HEADERS = {
     'cache-control': "no-cache"
 }
 
-def delete_tag():
+def reset():
     try:
         payload = {
             "consumer_key": POCKET_CONSUMER_KEY,
             "access_token": POCKET_ACCESS_TOKEN,
             "tag"         : "twitter",
             "detailType"  : "complete",
-            "count"       : 5000
+            "count"       : 3000
         }
         res = requests.request("POST", POCKET_GET_API_URL, data=json.dumps(payload), headers=HEADERS)
         res.raise_for_status()
         res_json = res.json()
         actions = []
         for item_id in res_json['list'].keys():
-            if len(res_json['list'][item_id]['tags']) >= 2:
+            if len(res_json['list'][item_id]['tags']) == 1:
                 action = {
-                    "action" : "tags_remove",
-                    "item_id": item_id,
-                    "tags"   : "twitter"
+                    "action" : "delete",
+                    "item_id": item_id
                 }
                 actions.append(action)
         if len(actions) > 0:
@@ -53,10 +52,10 @@ def delete_tag():
             }
             res = requests.request("POST", POCKET_SEND_API_URL, data=json.dumps(payload), headers=HEADERS)
             res.raise_for_status()
-        text = "Delete success!"
+        text = "Reset success! %d items were deleted." % len(actions)
         color = "good"
     except:
-        text = "Delete failed!"
+        text = "Reset failed!"
         color = "#ff0000"
     return { "text": text, "color": color }
 
@@ -68,7 +67,7 @@ def lambda_handler(event, context):
     slackbot_name = 'pocketer'
     if query.get('user_name', [slackbot_name])[0] == slackbot_name:
         return { 'statusCode': 200 }
-    content = delete_tag()
+    content = reset()
     slack_message = {
         'channel'    : SLACK_CHANNEL,
         'attachments': [
