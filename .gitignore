@@ -1,2 +1,3 @@
 lambda.json
-.python-version
+.venv
+lambda_function.zip
