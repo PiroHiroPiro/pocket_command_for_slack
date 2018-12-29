@@ -12,3 +12,6 @@ Pocketに保存されたページから「amazon_dash_button, conference, done, 
 
 ### RESET
 Pocketから「twitter」タグの付与されたものを3000件を削除する.
+
+### SELECT
+Pocketに保存されたQiitaのページからいいね数が100以上のものに対して，「twitter」タグを除去し，「selected_qiita」タグを付与する．
