@@ -64,12 +64,6 @@ def pick_up_item():
 
 
 def lambda_handler(event, context):
-    token = os.environ["SLACK_OUTGOING_WEBHOOK_TOKEN"]
-    query = parse_qs(event.get("body") or "")
-    if query.get("token", [""])[0] != token:
-        logger.error("Undefined token: %s", query.get("token", [""])[0])
-        return { "statusCode": 400 }
-
     content = pick_up_item()
     slack_message = {
         "channel"    : SLACK_CHANNEL,
