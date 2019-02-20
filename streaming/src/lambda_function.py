@@ -7,6 +7,7 @@ import os
 import logging
 from urllib.parse import parse_qs
 from datetime import datetime, timedelta
+import random
 
 
 logger = logging.getLogger()
@@ -36,6 +37,8 @@ not_include_tags = [
     "selected_qiita"
 ]
 
+random_255 = lambda: random.randint(0,255)
+
 
 def get_new_item():
     from_time = datetime.now() -  timedelta(minutes=1)
@@ -57,7 +60,6 @@ def get_new_item():
     if isinstance(res_json["list"], list):
         return
 
-
     contents = []
     for item_id in res_json["list"].keys():
         item_keys = res_json["list"][item_id].keys()
@@ -76,19 +78,19 @@ def get_new_item():
 
         item_title = res_json["list"][item_id]["given_title"]
         item_url = res_json["list"][item_id]["given_url"]
+        color_code = "#%02X%02X%02X" % (random_255(),random_255(),random_255())
 
         content = {
             "fallback": "%s(%s)" % (item_title, item_url),
-            "color": "#a5ff00",
+            "color": color_code,
             "fields":[
                 {
                 "title": item_title,
-                "title_link": item_url
+                "value": item_url
                 }
             ],
             "ts": time_added
         }
-
         contents.append(content)
 
     if len(contents) > 0:
