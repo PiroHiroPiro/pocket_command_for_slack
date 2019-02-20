@@ -57,6 +57,8 @@ def get_new_item():
     if isinstance(res_json["list"], list):
         return
 
+
+    contents = []
     for item_id in res_json["list"].keys():
         item_keys = res_json["list"][item_id].keys()
         in_item_keys = lambda x:x in item_keys
@@ -76,44 +78,40 @@ def get_new_item():
         item_url = res_json["list"][item_id]["given_url"]
 
         content = {
-            "fallback": item_title,
-            "pretext":"新規アイテムがPocketに登録されました",
+            "fallback": "%s(%s)" % (item_title, item_url),
+            "color": "#a5ff00",
             "fields":[
                 {
                 "title": item_title,
-                "value": item_url
+                "title_link": item_url
                 }
             ],
-            "color": "good",
             "ts": time_added
         }
 
-        send_item(content)
+        contents.append(content)
 
-    return
+    if len(contents) > 0:
+        return contents
+    else:
+        return None
 
 
-def send_item(content):
+def lambda_handler(event, context):
+    contents = get_new_item()
+
+    if contents is None:
+        return {"statusCode": 200}
+
     slack_message = {
         "channel"    : SLACK_CHANNEL,
-        "attachments": [
-            content
-        ]
+        "attachments": contents
     }
 
     try:
         req = requests.post(SLACK_POST_URL, data=json.dumps(slack_message))
         logger.info("Message posted to %s", slack_message["channel"])
-    except requests.exceptions.RequestException as e:
-        logger.error("Request failed: %s", e)
-
-    return
-
-
-def lambda_handler(event, context):
-    try:
-        get_new_item()
         return {"statusCode": 200}
-    except Exception as e:
+    except requests.exceptions.RequestException as e:
         logger.error("Request failed: %s", e)
         return {"statusCode": 400}
