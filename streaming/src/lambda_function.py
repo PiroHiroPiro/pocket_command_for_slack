@@ -70,11 +70,22 @@ def get_new_item():
 
         item_title = res_json["list"][item_id]["given_title"]
         item_url = res_json["list"][item_id]["given_url"]
+        updated_time = res_json["list"][item_id]["time_updated"]
 
-        text = "%s (%s)" % (item_title, item_url)
-        color = "good"
+        content = {
+            "fallback": item_title,
+            "pretext":"新規アイテムがPocketに登録されました",
+            "fields":[
+                {
+                "title": item_title,
+                "value": item_url
+                }
+            ],
+            "color": "good",
+            "ts": updated_time
+        }
 
-        send_item({"text": text, "color": color})
+        send_item(content)
 
     return
 
