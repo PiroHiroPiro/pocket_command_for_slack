@@ -54,13 +54,26 @@ def pick_up_item():
 
         picked_item_title = res_json["list"][picked_item_id]["resolved_title"]
         picked_item_url = POCKET_ARTICLE_BASE_URL % res_json["list"][picked_item_id]["item_id"]
-        text = "%s (%s)" % (picked_item_title, picked_item_url)
-        color = "good"
+        picked_item_updated_time = res_json["list"][picked_item_id]["time_updated"]
+
+        content = {
+            "fields":[
+                {
+                "title": picked_item_title,
+                "value": picked_item_url
+                }
+            ],
+            "color": "good",
+            "ts": updated_time
+        }
+
     except:
         text = "Pick up post Failed!"
         color = "#ff0000"
 
-    return {"text": text, "color": color}
+        content = {"text": text, "color": color}
+
+    return content
 
 
 def lambda_handler(event, context):
