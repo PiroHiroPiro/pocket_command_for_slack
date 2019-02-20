@@ -60,7 +60,7 @@ def get_new_item():
     for item_id in res_json["list"].keys():
         item_keys = res_json["list"][item_id].keys()
         in_item_keys = lambda x:x in item_keys
-        if not all(map(in_item_keys, ("given_title", "given_url", "tags"))):
+        if not all(map(in_item_keys, ("given_title", "given_url", "tags", "time_added"))):
             continue
 
         item_tags = res_json["list"][item_id]["tags"].keys()
@@ -68,9 +68,12 @@ def get_new_item():
         if any(map(in_item_tags, not_include_tags)):
             continue
 
+        time_added = res_json["list"][item_id]["time_added"]
+        if time_added < from_unix_time:
+            continue
+
         item_title = res_json["list"][item_id]["given_title"]
         item_url = res_json["list"][item_id]["given_url"]
-        updated_time = res_json["list"][item_id]["time_updated"]
 
         content = {
             "fallback": item_title,
@@ -82,7 +85,7 @@ def get_new_item():
                 }
             ],
             "color": "good",
-            "ts": updated_time
+            "ts": time_added
         }
 
         send_item(content)
