@@ -26,10 +26,11 @@ POCKET_HEADERS = {
     "cache-control": "no-cache"
 }
 
+random_255 = lambda: random.randint(0,255)
+
 
 def pick_up_item():
     try:
-
         not_include_tags = [
                 "amazon_dash_button",
                 "conference",
@@ -50,26 +51,28 @@ def pick_up_item():
         res_json = res.json()
 
         item_ids = list(res_json["list"].keys())
-        picked_item_id = random.choice(item_ids)
+        item_id = random.choice(item_ids)
 
-        picked_item_title = res_json["list"][picked_item_id]["resolved_title"]
-        picked_item_url = POCKET_ARTICLE_BASE_URL % res_json["list"][picked_item_id]["item_id"]
-        picked_item_updated_time = res_json["list"][picked_item_id]["time_updated"]
+        item_title = res_json["list"][item_id]["resolved_title"]
+        item_url = POCKET_ARTICLE_BASE_URL % res_json["list"][item_id]["item_id"]
+        time_added = res_json["list"][item_id]["time_added"]
+        color_code = "#%02X%02X%02X" % (random_255(),random_255(),random_255())
 
         content = {
+            "fallback": item_title,
+            "color": color_code,
             "fields":[
                 {
-                "title": picked_item_title,
-                "value": picked_item_url
+                "title": item_title,
+                "value": item_url
                 }
             ],
-            "color": "good",
-            "ts": picked_item_updated_time
+            "ts": time_added
         }
 
     except:
         content = {
-            "text": "Pick up post Failed!",
+            "text": "Pick up Failed!",
             "color": "danger"
         }
 
