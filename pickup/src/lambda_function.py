@@ -64,14 +64,14 @@ def pick_up_item():
                 }
             ],
             "color": "good",
-            "ts": updated_time
+            "ts": picked_item_updated_time
         }
 
     except:
-        text = "Pick up post Failed!"
-        color = "#ff0000"
-
-        content = {"text": text, "color": color}
+        content = {
+            "text": "Pick up post Failed!",
+            "color": "danger"
+        }
 
     return content
 
