@@ -2,12 +2,13 @@
 # encoding: utf-8
 
 import json
-import requests
 import os
 import logging
 from urllib.parse import parse_qs
 from datetime import datetime, timedelta
 import random
+
+import requests
 
 
 logger = logging.getLogger()
@@ -26,7 +27,7 @@ POCKET_HEADERS = {
     "cache-control": "no-cache"
 }
 
-not_include_tags = [
+NOT_INCLUDE_TAGS = [
     "conference",
     "done",
     "tool",
@@ -37,12 +38,12 @@ not_include_tags = [
     "selected_qiita"
 ]
 
-random_255 = lambda: random.randint(0,255)
+RANDOM255 = lambda: random.randint(0,255)
 
 
-def get_new_item():
-    from_time = datetime.now() -  timedelta(minutes=1)
-    from_unix_time = from_time.timestamp()
+def get_new_items():
+    since_time = datetime.now() -  timedelta(minutes=1)
+    since_unix_time = since_time.timestamp()
 
     payload = {
         "consumer_key": POCKET_CONSUMER_KEY,
@@ -50,7 +51,7 @@ def get_new_item():
         "sort": "newest",
         "detailType"  : "complete",
         "count": 10,
-        "since": from_unix_time
+        "since": since_unix_time
     }
 
     res = requests.request("POST", POCKET_GET_API_URL, data=json.dumps(payload), headers=POCKET_HEADERS)
@@ -58,7 +59,7 @@ def get_new_item():
     res_json = res.json()
 
     if isinstance(res_json["list"], list):
-        return
+        return []
 
     contents = []
     for item_id in res_json["list"].keys():
@@ -69,7 +70,7 @@ def get_new_item():
 
         item_tags = res_json["list"][item_id]["tags"].keys()
         in_item_tags = lambda x:x in item_tags
-        if any(map(in_item_tags, not_include_tags)):
+        if any(map(in_item_tags, NOT_INCLUDE_TAGS)):
             continue
 
         time_added = res_json["list"][item_id]["time_added"]
@@ -78,7 +79,7 @@ def get_new_item():
 
         item_title = res_json["list"][item_id]["given_title"]
         item_url = res_json["list"][item_id]["given_url"]
-        color_code = "#%02X%02X%02X" % (random_255(),random_255(),random_255())
+        color_code = "#%02X%02X%02X" % (RANDOM255(), RANDOM255(), RANDOM255())
 
         content = {
             "fallback": "%s(%s)" % (item_title, item_url),
@@ -93,27 +94,25 @@ def get_new_item():
         }
         contents.append(content)
 
-    if len(contents) > 0:
-        return contents
-    else:
-        return None
+    return contents
 
 
 def lambda_handler(event, context):
-    contents = get_new_item()
-
-    if contents is None:
-        return {"statusCode": 200}
-
-    slack_message = {
-        "channel"    : SLACK_CHANNEL,
-        "attachments": contents
-    }
-
     try:
-        req = requests.post(SLACK_POST_URL, data=json.dumps(slack_message))
+        contents = get_new_items()
+
+        if contents == []:
+            return {"statusCode": 200}
+
+        slack_message = {
+            "channel"    : SLACK_CHANNEL,
+            "attachments": contents
+        }
+
+        res = requests.request("POST", SLACK_POST_URL, data=json.dumps(slack_message))
+        res.raise_for_status()
         logger.info("Message posted to %s", slack_message["channel"])
         return {"statusCode": 200}
-    except requests.exceptions.RequestException as e:
-        logger.error("Request failed: %s", e)
+    except Exception as e:
+        logger.error("Error: %s", e)
         return {"statusCode": 400}
