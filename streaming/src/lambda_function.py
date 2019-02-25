@@ -74,7 +74,7 @@ def get_new_items():
             continue
 
         time_added = res_json["list"][item_id]["time_added"]
-        if float(time_added) < from_unix_time:
+        if float(time_added) < since_unix_time:
             continue
 
         item_title = res_json["list"][item_id]["given_title"]
