@@ -28,14 +28,16 @@ POCKET_HEADERS = {
 }
 
 NOT_INCLUDE_TAGS = [
+    "amazon_dash_button",
     "conference",
     "done",
-    "tool",
-    "twitter",
     "english",
-    "favorite",
     "keep",
-    "selected_qiita"
+    "selected_qiita",
+    "tmp",
+    "tokyo",
+    "tool",
+    "twitter"
 ]
 
 RANDOM255 = lambda: random.randint(0,255)
