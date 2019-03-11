@@ -2,10 +2,11 @@
 # encoding: utf-8
 
 import json
-import requests
 import os
 import logging
 from urllib.parse import parse_qs
+
+import requests
 
 
 logger = logging.getLogger()
@@ -27,43 +28,85 @@ POCKET_HEADERS = {
 
 TWITTER_HOST = "https://twitter.com/"
 
+REMOVE_TAGS = [
+    "twitter",
+    "tmp"
+]
 
-def clean_items():
+
+def clean_items_related_tag(tag):
+    payload = {
+        "consumer_key": POCKET_CONSUMER_KEY,
+        "access_token": POCKET_ACCESS_TOKEN,
+        "tag"         : tag,
+        "detailType"  : "complete",
+        "count"       : 5000
+    }
+    res = requests.request("POST", POCKET_GET_API_URL, data=json.dumps(payload), headers=POCKET_HEADERS)
+    res.raise_for_status()
+    res_json = res.json()
+
+    actions = []
+    for item_id in res_json["list"].keys():
+        item_keys = res_json["list"][item_id].keys()
+        in_item_keys = lambda x:x in item_keys
+        if not all(map(in_item_keys, ("resolved_url", "tags"))):
+            continue
+
+        # 指定されたtag以外のtagも付与されているitemからtagの削除
+        elif len(res_json["list"][item_id]["tags"]) >= 2:
+            action = {
+                "action" : "tags_remove",
+                "item_id": item_id,
+                "tags"   : tag
+            }
+            actions.append(action)
+
+    return actions
+
+
+def clean_items_startwith_twitter():
+    payload = {
+        "consumer_key": POCKET_CONSUMER_KEY,
+        "access_token": POCKET_ACCESS_TOKEN,
+        "tag"         : "twitter",
+        "detailType"  : "complete",
+        "count"       : 5000
+    }
+    res = requests.request("POST", POCKET_GET_API_URL, data=json.dumps(payload), headers=POCKET_HEADERS)
+    res.raise_for_status()
+    res_json = res.json()
+
+    actions = []
+    for item_id in res_json["list"].keys():
+        item_keys = res_json["list"][item_id].keys()
+
+        if "resolved_url" not in item_keys:
+            continue
+
+        # TwitterへのURLを持つitemの削除
+        if res_json["list"][item_id]["resolved_url"].startswith(TWITTER_HOST):
+            action = {
+                "action" : "delete",
+                "item_id": item_id
+            }
+            actions.append(action)
+
+    return actions
+
+
+def lambda_handler(event, context):
+    token = os.environ["SLACK_OUTGOING_WEBHOOK_TOKEN"]
+    query = parse_qs(event.get("body") or "")
+    if query.get("token", [""])[0] != token:
+        logger.error("Undefined token: %s", query.get("token", [""])[0])
+        return { "statusCode": 400 }
+
     try:
-        payload = {
-            "consumer_key": POCKET_CONSUMER_KEY,
-            "access_token": POCKET_ACCESS_TOKEN,
-            "tag"         : "twitter",
-            "detailType"  : "complete",
-            "count"       : 5000
-        }
-        res = requests.request("POST", POCKET_GET_API_URL, data=json.dumps(payload), headers=POCKET_HEADERS)
-        res.raise_for_status()
-        res_json = res.json()
         actions = []
-
-        for item_id in res_json["list"].keys():
-            item_keys = res_json["list"][item_id].keys()
-            in_item_keys = lambda x:x in item_keys
-            if not all(map(in_item_keys, ("resolved_url", "tags"))):
-                continue
-
-            # TwitterへのURLを持つitemの削除
-            if res_json["list"][item_id]["resolved_url"].startswith(TWITTER_HOST):
-                action = {
-                    "action" : "delete",
-                    "item_id": item_id
-                }
-                actions.append(action)
-
-            # "twitter"以外のtagも付与されているitemから"twitter"tagの削除
-            if len(res_json["list"][item_id]["tags"]) >= 2:
-                action = {
-                    "action" : "tags_remove",
-                    "item_id": item_id,
-                    "tags"   : "twitter"
-                }
-                actions.append(action)
+        for tag in REMOVE_TAGS:
+            actions += clean_items_related_tag(tag)
+        actions += clean_items_startwith_twitter()
 
         if len(actions) > 0:
             payload = {
@@ -74,34 +117,30 @@ def clean_items():
             res = requests.request("POST", POCKET_SEND_API_URL, data=json.dumps(payload), headers=POCKET_HEADERS)
             res.raise_for_status()
 
-        text = "Cleaned  %d items." % len(actions)
-        color = "good"
-    except:
-        text = "Clean items failed!"
-        color = "#ff0000"
+        slack_message = {
+            "channel"    : SLACK_CHANNEL,
+            "attachments": [
+                {
+                    "text": "Cleaned  %d items." % len(actions),
+                    "color": "good"
+                }
+            ]
+        }
+        res = requests.request("POST", SLACK_POST_URL, data=json.dumps(slack_message))
+        res.raise_for_status()
 
-    return { "text": text, "color": color }
-
-
-def lambda_handler(event, context):
-    token = os.environ["SLACK_OUTGOING_WEBHOOK_TOKEN"]
-    query = parse_qs(event.get("body") or "")
-    if query.get("token", [""])[0] != token:
-        logger.error("Undefined token: %s", query.get("token", [""])[0])
-        return { "statusCode": 400 }
-
-    content = clean_items()
-    slack_message = {
-        "channel"    : SLACK_CHANNEL,
-        "attachments": [
-            content
-        ],
-    }
-
-    try:
-        req = requests.post(SLACK_POST_URL, data=json.dumps(slack_message))
         logger.info("Message posted to %s", slack_message["channel"])
         return { "statusCode": 200 }
-    except requests.exceptions.RequestException as e:
+    except Exception as e:
+        slack_message = {
+            "channel"    : SLACK_CHANNEL,
+            "attachments": [
+                {
+                    "text": "Failed cleane items.",
+                    "color": "#ff0000"
+                }
+            ]
+        }
+        res = requests.request("POST", SLACK_POST_URL, data=json.dumps(slack_message))
         logger.error("Request failed: %s", e)
         return { "statusCode": 400 }
