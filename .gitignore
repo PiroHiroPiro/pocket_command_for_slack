@@ -2,6 +2,7 @@ lambda.json
 .venv
 lambda_function.zip
 env.yaml
+vars.tf
 
 # Created by https://www.gitignore.io/api/pycharm
 # Edit at https://www.gitignore.io/?templates=pycharm
