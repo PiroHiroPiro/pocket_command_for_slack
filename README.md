@@ -1,24 +1,78 @@
-# Pocket_API
+# Pocket command for slack
 
-## 目的
-以前作ったPocketerをLambda + API Gatewayで再実装．
+These are [slack](https://slack.com/) command to manipulate [pocket](https://getpocket.com/).
 
-## API
+## Requirement
+
+- Python:3.6
+- Pipenv:2018.11.26 or later
+
+## Command
 ### CLEAN
-Pocketに保存されたアイテムから，Twitterへのリンクを持つアイテムを削除する．
-Pocketに保存された複数タグを持つアイテムから「twitter」タグを除去する.
-現在使われていない．
+
+Deletes an item with a link to Twitter from the items stored on Pocket.
+Remove "twitter" tags from items with multiple tags stored on Pocket.
+Currently not used.
 
 ### PICKUP
-Pocketに保存されたページから「amazon_dash_button, conference, done, tool, twitter」タグ以外が付与されたアイテムを一つ取得する.
+
+Get one item from the page saved in Pocket.
 
 ### RESET
-Pocketから「twitter」タグの付与されたアイテムを3000件を削除する.
-現在使われていない．
+
+Deletes up to 3000 items given the "twitter" tag from Pocket.
+Currently not used.
 
 ### SELECT
-Pocketに保存されたQiitaのページからいいね数が100以上のアイテムに対して，「twitter」タグを除去し，「selected_qiita」タグを付与する．
-現在使われていない．
+
+Remove the "twitter" tag and add the "selected_qiita" tag to the item whose number of likes is 100 or more from the Qiita page stored in Pocket.
+Currently not used.
 
 ### STREAMING
-1分以内にPocketに保存されたアイテムを取得する．
+
+Get items stored on pocket within 1 minute.
+
+## Install
+
+Clone repository:
+
+```console
+$ git clone https://github.com/PiroHiroPiro/pocket_command_for_slack.git
+$ cd pocket_command_for_slack
+```
+
+Install libraries:
+
+```console
+$ pipenv install
+$ pipenv shell
+```
+
+Move to directory of desired command:
+
+```console
+$ cd [clean | pickup | reset | select | streaming]
+```
+
+Copy configuration file:
+
+```console
+$ cp lambda.json.example ./src/lambda.json
+```
+
+Enter the Lambda function name, roles, environment variables, etc. in the copied configuration file `lambda.json`:
+
+Upload to Lambda:
+
+```console
+$ cd src
+$ lambda-uploader
+```
+
+## Licence
+
+This software is released under the MIT License, see [LICENSE](https://github.com/PiroHiroPiro/pocket_command_for_slack/blob/master/LICENSE).
+
+## Author
+
+[Hiroyuki Nishizawa](https://github.com/PiroHiroPiro)
