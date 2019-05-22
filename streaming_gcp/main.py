@@ -7,6 +7,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 import random
 import requests
+from bs4 import BeautifulSoup
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -62,6 +63,10 @@ def get_new_items():
         item_url = res_json["list"][item_id]["given_url"]
         color_code = "#%02X%02X%02X" % (RANDOM255(), RANDOM255(), RANDOM255())
 
+        if item_title == '':
+            res = requests.get(item_url)
+            soup = BeautifulSoup(res.text)
+            item_title = soup.find('title').text
         content = {
             "fallback": "%s(%s)" % (item_title, item_url),
             "color": color_code,
