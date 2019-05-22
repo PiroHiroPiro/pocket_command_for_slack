@@ -458,3 +458,6 @@ $RECYCLE.BIN/
 #Custom ignore
 lambda.json
 Pipfile.lock
+
+# ignore env files
+env.yaml
