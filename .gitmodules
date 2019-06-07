@@ -1,0 +1,3 @@
+[submodule "streaming_lambda_go"]
+	path = streaming_lambda_go
+	url = https://github.com/yakult1995/pocket-go.git
