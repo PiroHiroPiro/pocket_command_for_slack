@@ -19,7 +19,7 @@ SLACK_CHANNEL = os.environ["SLACK_CHANNEL"]
 
 POCKET_CONSUMER_KEY = os.environ["POCKET_CONSUMER_KEY"]
 POCKET_ACCESS_TOKEN = os.environ["POCKET_ACCESS_TOKEN"]
-POCKET_ARTICLE_BASE_URL = "https://getpocket.com/a/read/%s"
+POCKET_ARTICLE_BASE_URL = "https://app.getpocket.com/read/%s"
 POCKET_GET_API_URL = "https://getpocket.com/v3/get"
 POCKET_HEADERS = {
     "content-type": "application/json;charset = UTF8",
