@@ -48,14 +48,14 @@ def unique_items():
             if not all(map(in_item_keys, ("resolved_url", "tags"))):
                 continue
 
-            if res_json["list"][item_id]["resolved_id"] in unique_resolved_url:
+            if res_json["list"][item_id]["resolved_url"] in unique_resolved_url:
                 action = {
                     "action" : "delete",
                     "item_id": item_id
                 }
                 actions.append(action)
             else:
-                unique_resolved_url.append(res_json["list"][item_id]["resolved_id"])
+                unique_resolved_url.add(res_json["list"][item_id]["resolved_url"])
 
         if len(actions) > 0:
             payload = {
