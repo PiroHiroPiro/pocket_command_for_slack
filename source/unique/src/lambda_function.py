@@ -82,7 +82,7 @@ def lambda_handler(event, context):
         logger.error("Undefined token: %s", query.get("token", [""])[0])
         return { "statusCode": 400 }
 
-    content = unique_twitter()
+    content = unique_items()
     slack_message = {
         "channel"    : SLACK_CHANNEL,
         "attachments": [
