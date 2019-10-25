@@ -13,7 +13,7 @@ Lambda upload:
 
 ```console
 $ docker-compose run awscli bash
-> cd [COMMAND]
+> cd [COMMAND]/src
 > lambda-uploader
 ```
 
