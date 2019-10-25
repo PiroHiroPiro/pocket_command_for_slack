@@ -47,7 +47,6 @@ Get items stored on pocket within 1 minute.
 ### UNIQUE
 
 Delete items have duplicate URL from Pocket.
-Currently not used.
 
 ## Licence
 
