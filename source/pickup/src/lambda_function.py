@@ -2,8 +2,8 @@
 # encoding: utf-8
 
 import json
-import os
 import logging
+import os
 import random
 from urllib.parse import parse_qs
 

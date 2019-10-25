@@ -1,0 +1,16 @@
+version: "3"
+
+services:
+  awscli:
+    build:
+      context: .
+      dockerfile: ./docker/awscli/Dockerfile
+    container_name: docker_awscli
+    env_file:
+      - ./.env
+    ports:
+      - "8888:8888"
+    tty: true
+    volumes:
+      - ./source:/usr/src/source
+    working_dir: /usr/src/source

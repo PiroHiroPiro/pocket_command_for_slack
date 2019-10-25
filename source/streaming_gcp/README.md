@@ -18,7 +18,7 @@ You need to configure gcloud cli. (`https://cloud.google.com/sdk/gcloud/referenc
 If you have not used Cloud Scheduler before, please specify CloudScheduler region as `asia-northeast1` in GCP console.
 
 
-Fill `streaming_gcp/tf-files/vars.tf.example` & execute below command. 
+Fill `streaming_gcp/tf-files/vars.tf.example` & execute below command.
 ```
 $ terraform apply
 ```

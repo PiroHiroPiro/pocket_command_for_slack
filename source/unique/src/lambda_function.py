@@ -2,9 +2,9 @@
 # encoding: utf-8
 
 import json
-import requests
-import os
 import logging
+import os
+import requests
 from urllib.parse import parse_qs
 
 
@@ -26,12 +26,11 @@ POCKET_HEADERS = {
 }
 
 
-def reset_twitter():
+def unique_items():
     try:
         payload = {
             "consumer_key": POCKET_CONSUMER_KEY,
             "access_token": POCKET_ACCESS_TOKEN,
-            "tag"         : "twitter",
             "detailType"  : "complete",
             "count"       : 3000
         }
@@ -39,18 +38,24 @@ def reset_twitter():
         res.raise_for_status()
         res_json = res.json()
 
-        actions = []
+        actions                 = []
+        unique_resolved_url = set()
 
+        # confirm that resolved_id of item with Twitter tag is in unique_resolved_url
         for item_id in res_json["list"].keys():
-            if "tags" not in res_json["list"][item_id].keys():
+            item_keys = res_json["list"][item_id].keys()
+            in_item_keys = lambda x:x in item_keys
+            if not all(map(in_item_keys, ("resolved_url", "tags"))):
                 continue
 
-            if len(res_json["list"][item_id]["tags"]) == 1:
+            if res_json["list"][item_id]["resolved_id"] in unique_resolved_url:
                 action = {
                     "action" : "delete",
                     "item_id": item_id
                 }
                 actions.append(action)
+            else:
+                unique_resolved_url.append(res_json["list"][item_id]["resolved_id"])
 
         if len(actions) > 0:
             payload = {
@@ -61,10 +66,10 @@ def reset_twitter():
             res = requests.request("POST", POCKET_SEND_API_URL, data=json.dumps(payload), headers=POCKET_HEADERS)
             res.raise_for_status()
 
-        text = "Reset success! %d items were deleted." % len(actions)
+        text  = "Success! %d items were deleted." % len(actions)
         color = "good"
     except:
-        text = "Reset failed!"
+        text  = "Failed!"
         color = "#ff0000"
 
     return { "text": text, "color": color }
@@ -77,7 +82,7 @@ def lambda_handler(event, context):
         logger.error("Undefined token: %s", query.get("token", [""])[0])
         return { "statusCode": 400 }
 
-    content = reset_twitter()
+    content = unique_twitter()
     slack_message = {
         "channel"    : SLACK_CHANNEL,
         "attachments": [
