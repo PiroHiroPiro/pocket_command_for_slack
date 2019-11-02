@@ -9,7 +9,7 @@ These are [slack](https://slack.com/) commands to manipulate [pocket](https://ge
 
 ## Usage
 
-Lambda upload:
+Upload to AWS Lambda :
 
 ```console
 $ docker-compose run awscli bash
