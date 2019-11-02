@@ -38,7 +38,7 @@ $ docker-compose build
 
 ### PICKUP
 
-Get one item from the page saved in Pocket.
+Get one item from Pocket.
 
 ### STREAMING
 
